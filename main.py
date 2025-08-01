@@ -167,7 +167,7 @@ def about():
 @app.route("/contact", methods=["POST", "GET"])
 def contact():
     form = request.form
-    if form == "POST":
+    if request.method == "POST":
         smtp_server = "smtp.gmail.com"
         port = 587
         sender_mail = "ifeanyiagada9@gmail.com"
