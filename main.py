@@ -178,16 +178,16 @@ def contact():
         message["To"] = receiver
         message["Subject"] = "Contact Message from Blog Website"
         message.set_content(
-            f"Name: {form['name']}"
-            f"Email: {form['mail']}"
-            f"Phone Number: {form['num']}"
+            f"Name: {form['name']}\n\n"
+            f"Email: {form['mail']}\n\n"
+            f"Phone Number: {form['num']}\n\n"
             f"Message: {form['message']}"
         )
         with smtplib.SMTP(smtp_server, port) as server:
             server.starttls()
             server.login(sender_mail, password)
             server.send_message(message)
-        flash("Email Successfully Sent", "success")
+        flash("Message Successfully Sent", "success")
         return redirect(url_for("contact"))
     return render_template("contact.html")
 
