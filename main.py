@@ -167,32 +167,28 @@ def about():
 @app.route("/contact", methods=["POST", "GET"])
 def contact():
     form = request.form
-    if current_user.is_authenticated:
-        if form == "POST":
-            smtp_server = "smtp.gmail.com"
-            port = 587
-            sender_mail = "ifeanyiagada9@gmail.com"
-            receiver = "ifeanyiagada123@gmail.com"
-            password = os.environ.get("PASSWORD_TEXT")
-            message = EmailMessage()
-            message["From"] = sender_mail
-            message["To"] = receiver
-            message["Subject"] = "Contact Message from Blog Website"
-            message.set_content(
-                f"Name: {form['name']}"
-                f"Email: {form['mail']}"
-                f"Phone Number: {form['num']}"
-                f"Message: {form['message']}"
-            )
-            with smtplib.SMTP(smtp_server, port) as server:
-                server.starttls()
-                server.login(sender_mail, password)
-                server.send_message(message)
-            flash("Email Successfully Sent", "success")
-            return redirect(url_for("contact"))
-        else:
-            flash("You need to be logged in to send a contact message", "danger")
-            return redirect(url_for("login"))
+    if form == "POST":
+        smtp_server = "smtp.gmail.com"
+        port = 587
+        sender_mail = "ifeanyiagada9@gmail.com"
+        receiver = "ifeanyiagada123@gmail.com"
+        password = os.environ.get("PASSWORD_TEXT")
+        message = EmailMessage()
+        message["From"] = sender_mail
+        message["To"] = receiver
+        message["Subject"] = "Contact Message from Blog Website"
+        message.set_content(
+            f"Name: {form['name']}"
+            f"Email: {form['mail']}"
+            f"Phone Number: {form['num']}"
+            f"Message: {form['message']}"
+        )
+        with smtplib.SMTP(smtp_server, port) as server:
+            server.starttls()
+            server.login(sender_mail, password)
+            server.send_message(message)
+        flash("Email Successfully Sent", "success")
+        return redirect(url_for("contact"))
     return render_template("contact.html")
 
 
