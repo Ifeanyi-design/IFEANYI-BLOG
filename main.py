@@ -1,6 +1,6 @@
 from functools import wraps
 import os
-from flask import Flask, render_template, redirect, url_for, flash, abort
+from flask import Flask, render_template, redirect, url_for, flash, abort, request
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
 from datetime import date
@@ -12,6 +12,8 @@ from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
 # from flask_gravatar import Gravatar
 import hashlib
 from urllib.parse import urlencode
+import smtplib
+from email.message import EmailMessage
 
 
 app = Flask(__name__)
@@ -162,8 +164,31 @@ def about():
     return render_template("about.html")
 
 
-@app.route("/contact")
+@app.route("/contact", methods=["POST", "GET"])
 def contact():
+    form = request.form
+    if form == "POST":
+        smtp_server = "smtp.gmail.com"
+        port = 587
+        sender_mail = "ifeanyiagada9@gmail.com"
+        receiver = "ifeanyiagada123@gmail.com"
+        password = "mqezabgeyhjammgv"
+        message = EmailMessage()
+        message["From"] = sender_mail
+        message["To"] = receiver
+        message["Subject"] = "Contact Message from Blog Website"
+        message.set_content(
+            f"Name: {form['name']}"
+            f"Email: {form['mail']}"
+            f"Phone Number: {form['num']}"
+            f"Message: {form['message']}"
+        )
+        with smtplib.SMTP(smtp_server, port) as server:
+            server.starttls()
+            server.login(sender_mail, password)
+            server.send_message(message)
+        flash("Email Successfully Sent", "success")
+        return redirect(url_for("contact"))
     return render_template("contact.html")
 
 
