@@ -23,7 +23,14 @@
         <!-- Contact Form - Enter your email address on line 19 of the mail/contact_me.php file to make this form work. -->
         <!-- WARNING: Some web hosts do not allow emails to be sent through forms to common mail hosts like Gmail or Yahoo. It's recommended that you use a private domain email address! -->
         <!-- To use the contact form, your site must be on a live web host with PHP! The form will not work locally! -->
-        <form name="sentMessage" id="contactForm" novalidate>
+        <form name="sentMessage" method="POST" id="contactForm" novalidate>
+          {%with messages=get_flashed_messages(with_categories=true)%}
+            {%if messages%}
+              {%for category, message in messages%}
+                <p class="alert alert-{{category}}" role="alert">{{message}}</p>
+              {%endfor%}
+            {%endif%}
+          {%endwith%}
           <div class="control-group">
             <div class="form-group floating-label-form-group controls">
               <label>Name</label>
@@ -32,13 +39,6 @@
             </div>
           </div>
           <div class="control-group">
-            {%with messages=get_flashed_messages(with_categories=true)%}
-      {%if messages%}
-        {%for category, message in messages%}
-          <p class="alert alert-{{category}}" role="alert">{{message}}</p>
-        {%endfor%}
-      {%endif%}
-    {%endwith%}
             <div class="form-group floating-label-form-group controls">
               <label>Email Address</label>
               <input name="mail" type="email" class="form-control" placeholder="Email Address" id="email" required data-validation-required-message="Please enter your email address.">
