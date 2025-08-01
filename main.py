@@ -172,7 +172,7 @@ def contact():
         port = 587
         sender_mail = "ifeanyiagada9@gmail.com"
         receiver = "ifeanyiagada123@gmail.com"
-        password = "mqezabgeyhjammgv"
+        password = os.environ.get("PASSWORD_TEXT")
         message = EmailMessage()
         message["From"] = sender_mail
         message["To"] = receiver
