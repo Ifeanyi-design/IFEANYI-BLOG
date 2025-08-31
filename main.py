@@ -246,8 +246,8 @@ def delete_post(post_id):
 @app.route("/post/<int:post_id>/comment", methods=["POST"])
 @login_required
 def add_comment(post_id):
-   form = CommentForm()
-   if form.validate_on_submit():
+    form = CommentForm()
+    if form.validate_on_submit():
         requested_post = BlogPost.query.get_or_404(post_id)
 
         new_comment = Comment(
