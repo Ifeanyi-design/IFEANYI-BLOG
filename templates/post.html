@@ -85,7 +85,7 @@ document.getElementById("commentForm").addEventListener("submit", async function
             newComment.innerHTML = `
                 <li>
                     <div class="commenterImage">
-                      <img src="https://www.gravatar.com/avatar/${md5(data.comment.email.trim().toLowerCase())}?s=100&d=retro&r=g"/>
+                      <img src="${data.comment.gravatar}"/>
                     </div>
                     <div class="commentText">
                       <p>${data.comment.text}</p>
