@@ -1,6 +1,6 @@
 from functools import wraps
 import os
-from flask import Flask, render_template, redirect, url_for, flash, abort, request
+from flask import Flask, render_template, redirect, url_for, flash, abort, request, jsonify
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
 from datetime import date
@@ -250,7 +250,7 @@ def add_comment(post_id):
     comment_text = request.form.get("comment")
 
     if not comment_text.strip():
-        return {"success": False, "error": "Comment cannot be empty"}, 400
+        return jsonify({"success": False, "error": "Comment cannot be empty"}), 400
 
     new_comment = Comment(
         comment=comment_text,
@@ -261,15 +261,15 @@ def add_comment(post_id):
     db.session.commit()
 
     # Return JSON with the new comment details
-    return {
+    return jsonify({
     "success": True,
     "comment": {
         "text": new_comment.comment,
         "author": current_user.name,
         "email": current_user.email,
-        "gravatar": gravatar_url(current_user.email)   # add this
+        "gravatar": gravatar_url(current_user.email)
     }
-}
+})
 
 
 if __name__ == "__main__":
