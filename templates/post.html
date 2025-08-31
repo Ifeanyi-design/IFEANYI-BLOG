@@ -41,29 +41,82 @@
             {{ ckeditor.config(name="comment") }}
             {{ wtf.quick_form(form, novalidate=true, button_map={"submit": "primary"}) }}
           </div>
-          <div class="col-lg-8 col-md-10 mx-auto comment">
-            {% for comment in post.post_comments %}
-              <ul class="commentList">
-
-                <li>
-                    <div class="commenterImage">
-                      <img src="{{gravatar_url(comment.comment_author.email)}}"/>
-                    </div>
-                    <div class="commentText">
-                      <p>{{comment.comment | safe}}</p>
-                      <span class="date sub-text">{{comment.comment_author.name}}</span>
-                    </div>
-                </li>
-
-              </ul>
-            {%endfor%}
-            </div>
+          div id="comments-container" class="col-lg-8 col-md-10 mx-auto comment">
+  {% for comment in post.post_comments %}
+    <ul class="commentList">
+      <li>
+          <div class="commenterImage">
+            <img src="{{gravatar_url(comment.comment_author.email)}}"/>
+          </div>
+          <div class="commentText">
+            <p>{{comment.comment | safe}}</p>
+            <span class="date sub-text">{{comment.comment_author.name}}</span>
+          </div>
+      </li>
+    </ul>
+  {% endfor %}
+</div>
 
 
           </div>
       </div>
     </div>
   </article>
+
+<script>
+document.getElementById("commentForm").addEventListener("submit", async function(event) {
+    event.preventDefault(); // stop normal form submit
+
+    const form = event.target;
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch(form.action, {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Create new comment DOM element
+            const newComment = document.createElement("ul");
+            newComment.classList.add("commentList");
+            newComment.innerHTML = `
+                <li>
+                    <div class="commenterImage">
+                      <img src="https://www.gravatar.com/avatar/${md5(data.comment.email.trim().toLowerCase())}?s=100&d=retro&r=g"/>
+                    </div>
+                    <div class="commentText">
+                      <p>${data.comment.text}</p>
+                      <span class="date sub-text">${data.comment.author}</span>
+                    </div>
+                </li>
+            `;
+
+            document.getElementById("comments-container").prepend(newComment);
+
+            // Clear CKEditor field
+            if (typeof CKEDITOR !== "undefined") {
+                CKEDITOR.instances['comment'].setData('');
+            }
+        } else {
+            alert(data.error || "Something went wrong");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Error submitting comment");
+    }
+});
+
+// Simple md5 for gravatar (can include a library instead)
+function md5(string) {
+  return CryptoJS.MD5(string).toString();
+}
+</script>
+
+<!-- Add crypto-js library for MD5 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
   <hr>
 {% include "footer.html" %}
