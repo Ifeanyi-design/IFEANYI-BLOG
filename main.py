@@ -243,6 +243,34 @@ def delete_post(post_id):
     db.session.commit()
     return redirect(url_for('get_all_posts'))
 
+@app.route("/post/<int:post_id>/comment", methods=["POST"])
+@login_required
+def add_comment(post_id):
+    post = BlogPost.query.get_or_404(post_id)
+    comment_text = request.form.get("comment")
+
+    if not comment_text.strip():
+        return {"success": False, "error": "Comment cannot be empty"}, 400
+
+    new_comment = Comment(
+        comment=comment_text,
+        comment_post=post,
+        comment_author=current_user
+    )
+    db.session.add(new_comment)
+    db.session.commit()
+
+    # Return JSON with the new comment details
+    return {
+    "success": True,
+    "comment": {
+        "text": new_comment.comment,
+        "author": current_user.name,
+        "email": current_user.email,
+        "gravatar": gravatar_url(current_user.email)   # add this
+    }
+}
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
