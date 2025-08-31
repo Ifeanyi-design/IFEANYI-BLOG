@@ -246,30 +246,32 @@ def delete_post(post_id):
 @app.route("/post/<int:post_id>/comment", methods=["POST"])
 @login_required
 def add_comment(post_id):
-    post = BlogPost.query.get_or_404(post_id)
-    comment_text = request.form.get("comment")
+   form = CommentForm()
+   if form.validate_on_submit():
+        requested_post = BlogPost.query.get_or_404(post_id)
 
-    if not comment_text.strip():
-        return jsonify({"success": False, "error": "Comment cannot be empty"}), 400
+        new_comment = Comment(
+            comment=form.comment.data,
+            comment_post=requested_post,
+            comment_author=current_user
+        )
+        db.session.add(new_comment)
+        db.session.commit()
 
-    new_comment = Comment(
-        comment=comment_text,
-        comment_post=post,
-        comment_author=current_user
-    )
-    db.session.add(new_comment)
-    db.session.commit()
+        return jsonify({
+            "success": True,
+            "comment": {
+                "text": new_comment.comment,
+                "author": current_user.name,
+                "gravatar": gravatar_url(current_user.email)
+            }
+        })
 
-    # Return JSON with the new comment details
-    return jsonify({
-    "success": True,
-    "comment": {
-        "text": new_comment.comment,
-        "author": current_user.name,
-        "email": current_user.email,
-        "gravatar": gravatar_url(current_user.email)
-    }
-})
+    return jsonify({"success": False, "error": "Comment cannot be empty"}), 400
+
+         
+
+    
 
 
 if __name__ == "__main__":
