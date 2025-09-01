@@ -39,7 +39,7 @@
           <div>
             {{ ckeditor.load() }}
             {{ ckeditor.config(name="comment") }}
-            {{ wtf.quick_form(form, id="commentForm", action=url_for('add_comment', post_id=post.id), novalidate=true, button_map={"submit": "primary"}) }}
+            {{ wtf.quick_form(form, id="commentForm", novalidate=true, button_map={"submit": "primary"}) }}
           </div>
           <div id="comments-container" class="col-lg-8 col-md-10 mx-auto comment">
   {% for comment in post.post_comments %}
@@ -62,62 +62,6 @@
       </div>
     </div>
   </article>
-
-<script>
-document.getElementById("commentForm").addEventListener("submit", async function(event) {
-    event.preventDefault();
-
-    // Update CKEditor content into textarea
-    for (let instance in CKEDITOR.instances) {
-        CKEDITOR.instances[instance].updateElement();
-    }
-
-    
-const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    const form = event.target;
-    const formData = new FormData(form);
-
-    // Get CSRF token from meta
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-    try {
-        const response = await fetch(form.action, {
-            method: "POST",
-            body: formData,
-            headers: {
-                "X-CSRFToken": csrfToken
-            }
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            const newComment = document.createElement("ul");
-            newComment.classList.add("commentList");
-            newComment.innerHTML = `
-                <li>
-                    <div class="commenterImage">
-                        <img src="${data.comment.gravatar}" />
-                    </div>
-                    <div class="commentText">
-                        <p>${data.comment.text}</p>
-                        <span class="date sub-text">${data.comment.author}</span>
-                    </div>
-                </li>
-            `;
-            document.getElementById("comments-container").prepend(newComment);
-
-            // Clear CKEditor
-            CKEDITOR.instances['comment'].setData('');
-        } else {
-            alert(data.error || JSON.stringify(data.errors) || "Something went wrong");
-        }
-    } catch (err) {
-        console.error(err);
-        alert("Error submitting comment");
-    }
-});
-</script>
 
   <hr>
 {% include "footer.html" %}
