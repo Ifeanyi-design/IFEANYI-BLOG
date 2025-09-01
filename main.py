@@ -14,7 +14,7 @@ import hashlib
 from urllib.parse import urlencode
 import smtplib
 from email.message import EmailMessage
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import CSRFProtect, generate_csrf
 
 
 app = Flask(__name__)
@@ -74,6 +74,10 @@ class Comment(db.Model):
 with app.app_context():
     db.create_all()
     db.session.commit()
+
+@app.context_processor
+def inject_csrf_token():
+    return dict(csrf_token=generate_csrf)
 
 @login_manager.user_loader
 def load_user(user_id):
