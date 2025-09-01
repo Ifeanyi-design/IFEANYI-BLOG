@@ -64,46 +64,61 @@
   </article>
 
 <script>
+
 document.getElementById("commentForm").addEventListener("submit", async function(event) {
-    event.preventDefault();
+    event.preventDefault(); // Stop normal form submit
 
     const form = event.target;
     const formData = new FormData(form);
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content"); // ✅ get token
+
+    // ✅ Put CKEditor content into the FormData
+    if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances['comment']) {
+        formData.set('comment', CKEDITOR.instances['comment'].getData());
+    }
+
+    // ✅ Get CSRF token from meta tag
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
     try {
         const response = await fetch(form.action, {
             method: "POST",
             body: formData,
             headers: {
-                "X-CSRFToken": csrfToken   // ✅ send token to Flask
+                "X-CSRFToken": csrfToken
             }
         });
 
         const data = await response.json();
 
         if (data.success) {
+            // Create new comment element
             const newComment = document.createElement("ul");
             newComment.classList.add("commentList");
             newComment.innerHTML = `
                 <li>
                     <div class="commenterImage">
-                      <img src="${data.comment.gravatar}"/>
+                        <img src="${data.comment.gravatar}" />
                     </div>
                     <div class="commentText">
-                      <p>${data.comment.text}</p>
-                      <span class="date sub-text">${data.comment.author}</span>
+                        <p>${data.comment.text}</p>
+                        <span class="date sub-text">${data.comment.author}</span>
                     </div>
                 </li>
             `;
+
+            // Add new comment to top of comments container
             document.getElementById("comments-container").prepend(newComment);
 
-            // ✅ Clear CKEditor field
-            if (typeof CKEDITOR !== "undefined") {
-                CKEDITOR.instances['comment'].setData('');
-            }
+            // Clear CKEditor field
+            CKEDITOR.instances['comment'].setData('');
         } else {
-            alert(data.error || "Something went wrong");
+            // Show errors from server
+            if (data.errors) {
+                let errorMessages = Object.values(data.errors).flat().join("\n");
+                alert(errorMessages);
+            } else {
+                alert(data.error || "Something went wrong");
+            }
         }
     } catch (err) {
         console.error(err);
