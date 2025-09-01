@@ -14,14 +14,12 @@ import hashlib
 from urllib.parse import urlencode
 import smtplib
 from email.message import EmailMessage
-from flask_wtf.csrf import CSRFProtect, generate_csrf
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
 ckeditor = CKEditor(app)
 Bootstrap(app)
-csrf = CSRFProtect(app)
 
 ##CONNECT TO DB
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL", "sqlite:///blog.db")
@@ -75,11 +73,6 @@ with app.app_context():
     db.create_all()
     db.session.commit()
 
-@app.context_processor
-def inject_csrf_token():
-    def csrf_token():
-        return generate_csrf()
-    return dict(csrf_token=csrf_token)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -251,37 +244,7 @@ def delete_post(post_id):
     db.session.commit()
     return redirect(url_for('get_all_posts'))
 
-@app.route("/post/<int:post_id>/comment", methods=["POST"])
-@login_required
-def add_comment(post_id):
-    form = CommentForm()
 
-    if form.validate_on_submit():
-        requested_post = BlogPost.query.get_or_404(post_id)
-
-        new_comment = Comment(
-            comment=form.comment.data,
-            comment_post=requested_post,
-            comment_author=current_user
-        )
-        db.session.add(new_comment)
-        db.session.commit()
-
-        return jsonify({
-            "success": True,
-            "comment": {
-                "text": new_comment.comment,
-                "author": current_user.name,
-                "gravatar": gravatar_url(current_user.email)
-            }
-        })
-
-    # 🟢 If errors exist, return them
-    if form.errors:
-        return jsonify({"success": False, "errors": form.errors}), 400
-
-    # 🔴 Otherwise return a fallback message
-    return jsonify({"success": False, "error": "Invalid comment submission"}), 400
 
          
 
