@@ -255,6 +255,7 @@ def delete_post(post_id):
 @login_required
 def add_comment(post_id):
     form = CommentForm()
+
     if form.validate_on_submit():
         requested_post = BlogPost.query.get_or_404(post_id)
 
@@ -275,7 +276,12 @@ def add_comment(post_id):
             }
         })
 
-    return jsonify({"success": False, "error": "Comment cannot be empty"}), 400
+    # 🟢 If errors exist, return them
+    if form.errors:
+        return jsonify({"success": False, "errors": form.errors}), 400
+
+    # 🔴 Otherwise return a fallback message
+    return jsonify({"success": False, "error": "Invalid comment submission"}), 400
 
          
 
