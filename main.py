@@ -77,7 +77,9 @@ with app.app_context():
 
 @app.context_processor
 def inject_csrf_token():
-    return dict(csrf_token=generate_csrf())
+    def csrf_token():
+        return generate_csrf()
+    return dict(csrf_token=csrf_token)
 
 @login_manager.user_loader
 def load_user(user_id):
