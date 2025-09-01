@@ -69,11 +69,15 @@ document.getElementById("commentForm").addEventListener("submit", async function
 
     const form = event.target;
     const formData = new FormData(form);
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content"); // ✅ get token
 
     try {
         const response = await fetch(form.action, {
             method: "POST",
-            body: formData
+            body: formData,
+            headers: {
+                "X-CSRFToken": csrfToken   // ✅ send token to Flask
+            }
         });
 
         const data = await response.json();
@@ -94,7 +98,7 @@ document.getElementById("commentForm").addEventListener("submit", async function
             `;
             document.getElementById("comments-container").prepend(newComment);
 
-            // Clear CKEditor field
+            // ✅ Clear CKEditor field
             if (typeof CKEDITOR !== "undefined") {
                 CKEDITOR.instances['comment'].setData('');
             }
