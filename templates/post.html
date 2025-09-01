@@ -64,17 +64,18 @@
   </article>
 
 <script>
-
 document.getElementById("commentForm").addEventListener("submit", async function(event) {
     event.preventDefault();
 
-    // Make sure CKEditor updates textarea
+    // Update CKEditor content into textarea
     for (let instance in CKEDITOR.instances) {
         CKEDITOR.instances[instance].updateElement();
     }
 
     const form = event.target;
     const formData = new FormData(form);
+
+    // Get CSRF token from meta
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
     try {
@@ -94,21 +95,20 @@ document.getElementById("commentForm").addEventListener("submit", async function
             newComment.innerHTML = `
                 <li>
                     <div class="commenterImage">
-                      <img src="${data.comment.gravatar}"/>
+                        <img src="${data.comment.gravatar}" />
                     </div>
                     <div class="commentText">
-                      <p>${data.comment.text}</p>
-                      <span class="date sub-text">${data.comment.author}</span>
+                        <p>${data.comment.text}</p>
+                        <span class="date sub-text">${data.comment.author}</span>
                     </div>
                 </li>
             `;
             document.getElementById("comments-container").prepend(newComment);
+
+            // Clear CKEditor
             CKEDITOR.instances['comment'].setData('');
-        } else if (data.errors) {
-            console.log("Validation errors:", data.errors);
-            alert("Please fill in the comment field.");
         } else {
-            alert(data.error || "Something went wrong");
+            alert(data.error || JSON.stringify(data.errors) || "Something went wrong");
         }
     } catch (err) {
         console.error(err);
