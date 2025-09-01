@@ -66,17 +66,15 @@
 <script>
 
 document.getElementById("commentForm").addEventListener("submit", async function(event) {
-    event.preventDefault(); // Stop normal form submit
+    event.preventDefault();
+
+    // Make sure CKEditor updates textarea
+    for (let instance in CKEDITOR.instances) {
+        CKEDITOR.instances[instance].updateElement();
+    }
 
     const form = event.target;
     const formData = new FormData(form);
-
-    // ✅ Put CKEditor content into the FormData
-    if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances['comment']) {
-        formData.set('comment', CKEDITOR.instances['comment'].getData());
-    }
-
-    // ✅ Get CSRF token from meta tag
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
     try {
@@ -91,41 +89,32 @@ document.getElementById("commentForm").addEventListener("submit", async function
         const data = await response.json();
 
         if (data.success) {
-            // Create new comment element
             const newComment = document.createElement("ul");
             newComment.classList.add("commentList");
             newComment.innerHTML = `
                 <li>
                     <div class="commenterImage">
-                        <img src="${data.comment.gravatar}" />
+                      <img src="${data.comment.gravatar}"/>
                     </div>
                     <div class="commentText">
-                        <p>${data.comment.text}</p>
-                        <span class="date sub-text">${data.comment.author}</span>
+                      <p>${data.comment.text}</p>
+                      <span class="date sub-text">${data.comment.author}</span>
                     </div>
                 </li>
             `;
-
-            // Add new comment to top of comments container
             document.getElementById("comments-container").prepend(newComment);
-
-            // Clear CKEditor field
             CKEDITOR.instances['comment'].setData('');
+        } else if (data.errors) {
+            console.log("Validation errors:", data.errors);
+            alert("Please fill in the comment field.");
         } else {
-            // Show errors from server
-            if (data.errors) {
-                let errorMessages = Object.values(data.errors).flat().join("\n");
-                alert(errorMessages);
-            } else {
-                alert(data.error || "Something went wrong");
-            }
+            alert(data.error || "Something went wrong");
         }
     } catch (err) {
         console.error(err);
         alert("Error submitting comment");
     }
 });
-
 </script>
 
   <hr>
