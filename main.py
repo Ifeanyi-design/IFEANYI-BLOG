@@ -14,12 +14,14 @@ import hashlib
 from urllib.parse import urlencode
 import smtplib
 from email.message import EmailMessage
+from flask_wtf.csrf import CSRFProtect
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
 ckeditor = CKEditor(app)
 Bootstrap(app)
+csrf = CSRFProtect(app)
 
 ##CONNECT TO DB
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL", "sqlite:///blog.db")
