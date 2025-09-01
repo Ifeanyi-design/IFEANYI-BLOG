@@ -72,6 +72,8 @@ document.getElementById("commentForm").addEventListener("submit", async function
         CKEDITOR.instances[instance].updateElement();
     }
 
+    
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const form = event.target;
     const formData = new FormData(form);
 
